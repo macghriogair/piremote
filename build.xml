@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="piremote" default="help">
+
+    <property name="basedir" value="."/>
+    <property name="distdir" value="tmp/" />
+    <property name="toolsdir" value="${basedir}/vendor/bin/"/>
+
+    <property file="${basedir}/build.properties"/>
+
+    <!-- DEPLOY -->
+    <target name="deploy" description="Deploy to production site">
+        <exec executable="bash">
+            <arg value="-c"/>
+            <arg value="cp -f ${basedir}/composer.lock ${basedir}/composer.lock.bak" />
+        </exec>
+        <exec executable="bash" passthru="true">
+            <arg value="-c"/>
+            <arg value="composer install --no-dev --no-scripts" />
+        </exec>
+
+        <exec executable="bash">
+            <arg value="-c"/>
+            <arg value="mv -f ${basedir}/composer.lock.bak ${basedir}/composer.lock" />
+        </exec>
+
+        <phingcall target="deploy.prepare" />
+        <phingcall target="deploy.copy" />
+
+        <phingcall target="deploy.rsync" />
+        <phingcall target="deploy.migrate" />
+    </target>
+
+    <target name="deploy.migrate">
+        <exec executable="bash" passthru="true">
+             <arg value="-c" />
+             <arg value="ssh ${productionUser}@${productionHost} 'cd ${productionDir}; php ./artisan migrate --force'" />
+        </exec>
+    </target>
+
+    <target name="deploy.rsync">
+        <filesync
+            sourceDir="${distdir}"
+            destinationDir="${production.user}@${production.host}:${production.dir}"
+            dryrun="false"
+            itemizechanges="true"
+            verbose="true"
+            checksum="true"
+            />
+    </target>
+
+    <target name="deploy.copy">
+        <copy todir="${basedir}/${distdir}" tstamp="true">
+            <fileset dir="${basedir}/">
+                <include name="app/**" />
+                <include name="bootstrap/**" />
+                <include name="database/**" />
+                <include name="public/**" />
+                <include name="resources/**" />
+                <include name="vendor/**" />
+                <include name=".env.example" />
+                <include name="artisan"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="deploy.prepare" unless="deploy.prepare.done">
+        <delete dir="${basedir}/${distdir}" quiet="true" />
+        <mkdir dir="${basedir}/${distdir}"/>
+        <property name="deploy.prepare.done" value="true" />
+    </target>
+</project>

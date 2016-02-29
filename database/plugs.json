@@ -1,0 +1,12 @@
+[
+  {
+    "name": "lampe",
+    "systemcode": "11010",
+    "unitcode": "01"
+  },
+  {
+    "name": "stehlampe",
+    "systemcode": "11010",
+    "unitcode": "02"
+  }
+]

@@ -1,0 +1,15 @@
+vendor/
+node_modules/
+tmp/
+# Laravel 5 & Lumen specific
+bootstrap/cache/
+storage/
+.env.*.php
+.env.php
+.env
+*.sqlite
+composer.lock
+composer.phar
+*.sublime-project
+*.sublime-workspace
+*.properties
