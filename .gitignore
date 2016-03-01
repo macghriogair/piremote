@@ -13,3 +13,4 @@ composer.phar
 *.sublime-project
 *.sublime-workspace
 *.properties
+plugs.json
